@@ -15,7 +15,7 @@ Architecture for the CRO on-demand claim summary service (The Hartford, EDS Clai
 | `architecture/generator/` | Python source that produces the draw.io file and previews. The diagram is generated, not hand-edited. |
 | `architecture/references/` | Enterprise patterns and inputs the design responds to. |
 
-## Current version: v0.5 (2026-11-05)
+## Current version: v0.6 (2026-11-05)
 
 | Page | Content |
 |---|---|
@@ -24,7 +24,8 @@ Architecture for the CRO on-demand claim summary service (The Hartford, EDS Clai
 | 3 - Handler access control | Four-layer model: SSO, AD group, claim entitlement (ENT# vs CLAIM#), audit |
 | 4 - Auth sequence | Authentication and API authorization sequence per pattern section 4 |
 | 5 - Security detail | Hop-by-hop security view in the pattern's own conventions (numbering, PRT, JWKS, IAM policy, APIC path) |
-| 6 - Pattern conformance | Adopted / adapted (D1-D4) / not applicable / open items |
+| 6 - Disaster recovery | Pilot Light (cold standby): primary and secondary region, continuous replication, pre-provisioned idle compute, failover and failback steps |
+| 7 - Pattern conformance | Adopted / adapted (D1-D4) / not applicable / open items |
 
 `CRO_CIH_Integration.drawio` is a separate one-page integration proposal for the CIO team: Claims Insights Hub -> mediation layer -> IBM APIC -> CRO Summary API, with the API contract. CRO is shown as a black box.
 
@@ -35,11 +36,13 @@ Point `ARCHDIAGRAM_SCRIPTS` at that library's `scripts/` folder, then:
 
 ```
 pip install cairosvg
-python3 architecture/generator/cro_v05.py architecture/diagrams/CRO_Architecture_v0.5
+python3 architecture/generator/cro_v06.py architecture/diagrams/CRO_Architecture_v0.6
 python3 architecture/generator/cih_integration.py architecture/diagrams/CRO_CIH_Integration
 ```
 
 ## Version history
+
+- v0.6: DR page added (Pilot Light cold standby, two regions); conformance moved to page 7.
 
 - v0.5: IBM APIC added as the external front door (CIH via mediation layer, API key + mTLS); new security detail page; conformance moved to page 6; CIH integration one-pager added.
 

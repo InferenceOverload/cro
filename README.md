@@ -15,19 +15,19 @@ Architecture for the CRO on-demand claim summary service (The Hartford, EDS Clai
 | `architecture/generator/` | Python source that produces the draw.io file and previews. The diagram is generated, not hand-edited. |
 | `architecture/references/` | Enterprise patterns and inputs the design responds to. |
 
-## Current version: v0.6 (2026-11-05)
+## Current version: v0.7 (2026-11-06)
 
 | Page | Content |
 |---|---|
 | 1 - Conceptual | Solution architecture with numbered request and ingest paths |
-| 2 - Deployment | AWS reference-architecture view with service icons |
-| 3 - Handler access control | Four-layer model: SSO, AD group, claim entitlement (ENT# vs CLAIM#), audit |
+| 2 - Deployment | AWS reference-architecture view with service icons; Apigee external entry; GCP options A (direct to Agent Engine) and B (Cloud Run front) |
+| 3 - Access control | SSO, AD group CRO-Handlers (the whole authorization, by business decision), audit |
 | 4 - Auth sequence | Authentication and API authorization sequence per pattern section 4 |
 | 5 - Security detail | Hop-by-hop security view in the pattern's own conventions (numbering, PRT, JWKS, IAM policy, APIC path) |
 | 6 - Disaster recovery | Pilot Light (cold standby): primary and secondary region, continuous replication, pre-provisioned idle compute, failover and failback steps |
 | 7 - Pattern conformance | Adopted / adapted (D1-D4) / not applicable / open items |
 
-`CRO_CIH_Integration.drawio` is a separate one-page integration proposal for the CIO team: Claims Insights Hub -> mediation layer -> IBM APIC -> CRO Summary API, with the API contract. CRO is shown as a black box.
+`CRO_CIH_Integration.drawio` is a separate one-page integration proposal for the CIO team: Claims Insights Hub -> mediation layer -> Apigee -> CRO Summary API, with the API contract. CRO is shown as a black box.
 
 ## Regenerating
 
@@ -36,11 +36,13 @@ Point `ARCHDIAGRAM_SCRIPTS` at that library's `scripts/` folder, then:
 
 ```
 pip install cairosvg
-python3 architecture/generator/cro_v06.py architecture/diagrams/CRO_Architecture_v0.6
+python3 architecture/generator/cro_v07.py architecture/diagrams/CRO_Architecture_v0.7
 python3 architecture/generator/cih_integration.py architecture/diagrams/CRO_CIH_Integration
 ```
 
 ## Version history
+
+- v0.7: Apigee replaces APIC as the external front door; GCP side shows option A (worker -> WIF -> Agent Engine) and option B (worker -> WIF -> Cloud Run front -> Agent Engine), DAIO to confirm; handler-level entitlement removed, AD group is the authorization; CIH one-pager updated.
 
 - v0.6: DR page added (Pilot Light cold standby, two regions); conformance moved to page 7.
 

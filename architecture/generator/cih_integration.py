@@ -5,11 +5,11 @@ sys.path.insert(0, os.environ.get('ARCHDIAGRAM_SCRIPTS', '/mnt/skills/plugins/cl
 from archdiagram import Diagram, CUSTOM
 
 W = 'stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"'
-CUSTOM['apic'] = ('<rect x="0" y="0" width="48" height="48" rx="6" fill="#0F62FE"/>'
-                  f'<rect x="10" y="14" width="28" height="20" rx="3" {W}/><path d="M10,22 H38 M18,28 H30" {W}/>'
-                  '<text x="24" y="44" text-anchor="middle" font-size="8" font-family="Arial" font-weight="bold" fill="#fff">APIC</text>')
+CUSTOM['apigee'] = ('<rect x="0" y="0" width="48" height="48" rx="6" fill="#4285F4"/>'
+                    f'<circle cx="24" cy="22" r="9" {W}/><path d="M24,13 V31 M15,22 H33 M18,16 Q24,22 30,28 M30,16 Q24,22 18,28" {W}/>'
+                    '<text x="24" y="44" text-anchor="middle" font-size="7.5" font-family="Arial" font-weight="bold" fill="#fff">APIGEE</text>')
 
-d = Diagram(subtitle='The Hartford EDS Claims  |  Integration proposal for CIO / Claims Insights Hub  |  v0.1  |  2026-11-05')
+d = Diagram(subtitle='The Hartford EDS Claims  |  Integration proposal for CIO / Claims Insights Hub  |  v0.2  |  2026-11-06')
 p = d.page('CIH integration', 'CRO Claim Summary API: Integration with Claims Insights Hub', 1700, 930, 'conceptual')
 NAVY = '#1F4E79'
 
@@ -19,8 +19,8 @@ p.panel('ctr', 30, 480, 1250, 425, 'Integration contract (what CIH needs to know
 
 p.box('hd', 60, 175, 180, 60, 'Claim handler', ['Signed in to CIH;', 'CIH owns the screen'], 'ext', 'cio')
 p.box('cih', 60, 270, 180, 80, 'Claims Insights Hub', ['Renders the summary;', 'enforces which claims', 'a handler may see'], 'ext', 'cio')
-p.box('med', 300, 270, 260, 80, 'Mediation layer (CIO AWS)', ['Registered APIC consumer:', 'API key + client certificate (mTLS);', 'routes, retries, caches if desired'], 'integ', 'cio')
-p.box('apic', 680, 270, 200, 80, 'IBM APIC', ['CRO Summary API product;', 'subscription, quota, rate', 'limit, mTLS termination'], 'integ', 'eds')
+p.box('med', 300, 270, 260, 80, 'Mediation layer (CIO AWS)', ['Registered Apigee consumer:', 'API key + client certificate (mTLS);', 'routes, retries, caches if desired'], 'integ', 'cio')
+p.box('apic', 680, 270, 200, 80, 'Apigee', ['CRO Summary API product;', 'subscription, quota, rate', 'limit, mTLS termination'], 'integ', 'eds')
 p.box('cro', 920, 175, 330, 230, 'CRO Summary Service',
       ['Authenticates the calling service;', 'returns summaries for flagged claims', 'older than 30 days;', 'regenerates only when the claim', 'has changed since the last summary;', 'every summary versioned and auditable;', 'AI generation on Vertex AI Agent Engine', '(traced for audit and compliance)'], 'compute', 'eds')
 p.box('ui', 680, 175, 200, 60, 'CRO UI (interim)', ['EDS handler screen until', 'CIH hosts the summary'], 'ext', 'eds')
@@ -50,7 +50,7 @@ p.notes(50, 515, 400, 375, [
     '202  generation in progress; poll GET',
     '404  claim not flagged / not eligible',
     '401 / 403  caller not authorized',
-    '429  quota exceeded (APIC)',
+    '429  quota exceeded (Apigee)',
     ('h', 'PAYLOAD'),
     'summaryText, version, generatedAt,',
     'dataAsOf, claimDataVersion, stale (bool),',
@@ -59,14 +59,15 @@ p.notes(50, 515, 400, 375, [
 p.notes(470, 515, 400, 375, [
     ('h', 'AUTHENTICATION AND AUTHORIZATION'),
     'Caller: mediation layer service identity',
-    '  APIC API key + mTLS client certificate',
+    '  Apigee API key + mTLS client certificate',
     '  (same front door as other EDS services)',
     'No handler token crosses to CRO',
     'CRO policy for this caller: read + request',
     '  generation only; no admin methods',
     ('h', 'HANDLER-LEVEL VISIBILITY'),
-    'Enforced by CIH, which knows the handler',
-    '  and the claim. CRO does not re-check.',
+    'Not applied in CRO (business scope: all',
+    '  CRO-Handlers, all flagged claims). If CIH',
+    '  needs claim-level rules, CIH enforces them.',
     'Optional: mediation passes X-Handler-Id',
     '  for CRO audit logging only.',
     ('h', 'AUDIT'),
@@ -79,17 +80,17 @@ p.notes(890, 515, 370, 375, [
     ('h', 'FLOW'),
     '1  Handler opens a claim in CIH',
     '2  CIH asks mediation for the summary',
-    '3  Mediation calls the APIC product',
-    '4  APIC forwards to CRO; 200 or 202',
+    '3  Mediation calls the Apigee product',
+    '4  Apigee forwards to CRO; 200 or 202',
     '5  Response back via mediation to CIH',
     ('h', 'NON-FUNCTIONAL'),
-    'Latency: stored < 500 ms p95 at APIC;',
-    '  generation 30 to 90 s (poll)',
+    'Latency (targets, to validate): stored',
+    '  < 500 ms p95; generation 30 to 90 s',
     'Volume: on demand only; no bulk pull',
     'Availability: tied to CRO metal tier',
     ('h', 'ONBOARDING STEPS'),
     'a  EDS publishes product + OpenAPI',
-    'b  CIO subscribes mediation in APIC',
+    'b  CIO subscribes mediation in Apigee',
     'c  Certificates exchanged; test in non-prod',
     'd  CIH integrates; interim CRO UI retired',
     ('h', 'OPEN QUESTIONS FOR CIO'),
